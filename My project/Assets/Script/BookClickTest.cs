@@ -156,7 +156,6 @@ public class BookClickTest : MonoBehaviour
     void LateUpdate()
 
     {
-        Debug.Log("LateUpdate 실행 중 / playingEffect = " + playingEffect);
         if (!playingEffect ||
             fullscreenMaterial == null ||
             bookAnimator == null)
