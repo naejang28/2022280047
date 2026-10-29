@@ -424,10 +424,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e26d9d9841dffe48b1ad81aa2008a24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SyncAnimationController
-  stateName: Book_Open
-  startTimeRatio: 0
-  endTimeRatio: 1
-  playSpeed: 4
 --- !u!1 &54598596
 GameObject:
   m_ObjectHideFlags: 0
@@ -2005,7 +2001,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.8490566, g: 0.8490566, b: 0.8490566, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -6144,6 +6140,38 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6f0672dc4c9a93a4e862b9286ac7c875, type: 3}
+--- !u!1 &629923666
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 629923667}
+  m_Layer: 0
+  m_Name: Closing_Exit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &629923667
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 629923666}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -85.75614, y: 3.11031, z: 162.876}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1119039859}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &639867784
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8655,6 +8683,77 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4375575893425679216, guid: 6f0672dc4c9a93a4e862b9286ac7c875, type: 3}
   m_PrefabInstance: {fileID: 763398513}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1119039858 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+  m_PrefabInstance: {fileID: 2118489327}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1119039859 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+  m_PrefabInstance: {fileID: 2118489327}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1119039860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119039858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4651420fa3331bd4f97cba9fa40eb943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpaceDistortionExit
+  bookAnimator: {fileID: 1119039861}
+  fullscreenMaterial: {fileID: 2100000, guid: e46f22f3a4d94c14789b38792db3e5d0, type: 2}
+  cameraController: {fileID: 706805808}
+  effectStartFrame: 20
+  effectDuration: 3
+  targetBookColliderName: book_animation_exit
+--- !u!95 &1119039861
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119039858}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 23e39b7f21457d14ca40fbbeb83f12f1, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!65 &1119039862
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119039858}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.45944518, y: 0.13050859, z: 0.5471153}
+  m_Center: {x: 1.5710536, y: 0.059346043, z: 0.9050152}
 --- !u!1 &1158592384
 GameObject:
   m_ObjectHideFlags: 0
@@ -16445,10 +16544,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e26d9d9841dffe48b1ad81aa2008a24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SyncAnimationController
-  stateName: Book_Open
-  startTimeRatio: 0
-  endTimeRatio: 1
-  playSpeed: 5
 --- !u!4 &1810780576 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4375575893425679216, guid: 6f0672dc4c9a93a4e862b9286ac7c875, type: 3}
@@ -17515,6 +17610,88 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1364127735}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2118489327
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 629923667}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 4.69
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.304
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.73
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.00000058114523
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -180
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      propertyPath: m_Name
+      value: book_animation_exit
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1119039861}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1119039860}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1119039862}
+  m_SourcePrefab: {fileID: 100100000, guid: c13c3b3afe1dbff41862bd8ad141bf8e, type: 3}
 --- !u!1001 &2131966582
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17748,3 +17925,4 @@ SceneRoots:
   - {fileID: 452793202}
   - {fileID: 2015171622}
   - {fileID: 30463810}
+  - {fileID: 629923667}
