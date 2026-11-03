@@ -5,9 +5,14 @@ public class BookClickTest : MonoBehaviour
 {
     public Animator bookAnimator;
     public Material fullscreenMaterial;
-
+    public ParticleSystem bookMagicParticle; // 👈 마법 파티클 연결용
     public MonoBehaviour cameraController;
-    private bool cameraWasEnabled;
+    public MonoBehaviour playerController;
+
+    // 💡 [추가] 통째로 꺼버릴 책 오브젝트 (또는 책 컴포넌트가 붙어 있는 GameObject)
+    public GameObject bookObject;
+
+    private BookOutlineController outlineController;
 
     public int effectStartFrame = 35;
     public float effectDuration = 3f;
@@ -16,6 +21,9 @@ public class BookClickTest : MonoBehaviour
     public Transform bookStartPoint;
     public Transform destinationPoint;
     public float cameraMoveDuration = 2f;
+
+    [Header("테스트 설정")]
+    public bool skipStart = false;
 
     private bool playingEffect;
     private bool cameraMoving;
@@ -27,37 +35,54 @@ public class BookClickTest : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Start 실행됨");
+        Debug.Log("=== Start 실행됨 / Skip Start 체크 상태: " + skipStart + " ===");
 
-        Debug.Log("Player: " +
-            (playerTransform != null ? playerTransform.name : "연결 안 됨"));
+        outlineController = GetComponentInChildren<BookOutlineController>(true);
 
-        Debug.Log("BookStartPoint: " +
-            (bookStartPoint != null ? bookStartPoint.name : "연결 안 됨"));
+        SetControllersEnabled(false);
 
-        if (playerTransform != null && bookStartPoint != null)
+        if (skipStart)
         {
-            playerTransform.SetPositionAndRotation(
-                bookStartPoint.position,
-                bookStartPoint.rotation
-            );
+            if (playerTransform != null && destinationPoint != null)
+            {
+                playerTransform.SetPositionAndRotation(
+                    destinationPoint.position,
+                    destinationPoint.rotation
+                );
+            }
 
-            Debug.Log("Player 이동 완료: " + playerTransform.position);
+            SetControllersEnabled(true);
+            SetCursorState(false);
+
+            // 💡 스킵으로 시작할 때 책 통째로 끄기
+            HideBook();
         }
-
-        if (cameraController != null)
+        else
         {
-            cameraController.enabled = false;
+            if (playerTransform != null && bookStartPoint != null)
+            {
+                playerTransform.SetPositionAndRotation(
+                    bookStartPoint.position,
+                    bookStartPoint.rotation
+                );
+            }
+
+            SetControllersEnabled(false);
+            SetCursorState(true);
         }
     }
 
     void Update()
     {
-        // 효과 종료 후 지정 위치로 플레이어 이동
+        if (!playingEffect && !cameraMoving && !skipStart && (cameraController == null || !cameraController.enabled))
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+
         if (cameraMoving)
         {
-            if (playerTransform == null ||
-                destinationPoint == null)
+            if (playerTransform == null || destinationPoint == null)
             {
                 cameraMoving = false;
                 RestoreCameraControl();
@@ -68,11 +93,8 @@ public class BookClickTest : MonoBehaviour
 
             float t = cameraMoveDuration <= 0f
                 ? 1f
-                : Mathf.Clamp01(
-                    cameraMoveTimer / cameraMoveDuration
-                  );
+                : Mathf.Clamp01(cameraMoveTimer / cameraMoveDuration);
 
-            // 부드럽게 이동
             float smoothT = t * t * (3f - 2f * t);
 
             playerTransform.SetPositionAndRotation(
@@ -97,12 +119,10 @@ public class BookClickTest : MonoBehaviour
             return;
         }
 
-        // 연출 중에는 책 클릭을 다시 받지 않음
         if (playingEffect)
             return;
 
-        if (Mouse.current == null ||
-            !Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
             return;
 
         if (Camera.main == null)
@@ -123,8 +143,7 @@ public class BookClickTest : MonoBehaviour
                         ? bookAnimator.transform
                         : transform
                 ) ||
-                hit.collider.transform.parent?.name ==
-                    "book_animation";
+                hit.collider.transform.parent?.name == "book_animation";
 
             if (!clickedBook)
                 continue;
@@ -139,13 +158,13 @@ public class BookClickTest : MonoBehaviour
             {
                 timer = 0f;
                 playingEffect = true;
+                SetControllersEnabled(false);
+                SetCursorState(false);
 
-                if (cameraController != null)
+                // 💡 책을 '클릭했을 때'만 파티클이 재생되도록 이 위치에 있어야 합니다!
+                if (bookMagicParticle != null)
                 {
-                    cameraWasEnabled =
-                        cameraController.enabled;
-
-                    cameraController.enabled = false;
+                    bookMagicParticle.Play();
                 }
             }
 
@@ -154,25 +173,18 @@ public class BookClickTest : MonoBehaviour
     }
 
     void LateUpdate()
-
     {
-        if (!playingEffect ||
-            fullscreenMaterial == null ||
-            bookAnimator == null)
+        if (!playingEffect || fullscreenMaterial == null || bookAnimator == null)
             return;
 
-        AnimatorStateInfo state =
-            bookAnimator.GetCurrentAnimatorStateInfo(0);
-        Debug.Log("현재 애니메이션: " + state.fullPathHash);
-        Debug.Log("애니메이션 이름 확인: " +
-            state.IsName("Take 001_copy"));
+        AnimatorStateInfo state = bookAnimator.GetCurrentAnimatorStateInfo(0);
+
         if (!state.IsName("Take 001_copy"))
             return;
 
         float startTime = effectStartFrame / 30f;
 
-        if (state.normalizedTime <
-            startTime / state.length)
+        if (state.normalizedTime < startTime / state.length)
             return;
 
         timer += Time.deltaTime;
@@ -213,11 +225,58 @@ public class BookClickTest : MonoBehaviour
         }
     }
 
-        void RestoreCameraControl()
+    void RestoreCameraControl()
+    {
+        SetControllersEnabled(true);
+        SetCursorState(false);
+
+        // 💡 연출이 끝나고 도착 지점에 도달했을 때 책 통째로 끄기
+        HideBook();
+    }
+
+    void SetControllersEnabled(bool isEnabled)
     {
         if (cameraController != null)
         {
-            cameraController.enabled = true;
+            cameraController.enabled = isEnabled;
+        }
+
+        if (playerController != null)
+        {
+            playerController.enabled = isEnabled;
+        }
+    }
+
+    void SetCursorState(bool isVisible)
+    {
+        if (isVisible)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
+
+    // 💡 책 오브젝트와 아웃라인을 안전하게 꺼버리는 함수
+    void HideBook()
+    {
+        if (outlineController != null)
+        {
+            outlineController.enabled = false;
+        }
+
+        if (bookObject != null)
+        {
+            bookObject.SetActive(false); // 책 오브젝트 비활성화
+        }
+        else
+        {
+            // 만약 변수에 따로 안 넣었다면 이 스크립트가 붙은 오브젝트 자체를 끄기
+            gameObject.SetActive(false);
         }
     }
 }

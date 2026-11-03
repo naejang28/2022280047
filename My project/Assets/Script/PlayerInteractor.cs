@@ -1,12 +1,12 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerInteractor : MonoBehaviour
 {
-    public FirstPersonMover mover;     // PlayerÀÇ FirstPersonMover
+    public FirstPersonMover mover;     // Playerì˜ FirstPersonMover
 
-    private Exhibit nearby;            // Áö±İ °¡±îÀÌ ÀÖ´Â ÀÛÇ°
-    private GameObject openPanel;      // Áö±İ ¿­·Á ÀÖ´Â ÆĞ³Î
+    private Exhibit nearby;            // ì§€ê¸ˆ ê°€ê¹Œì´ ìˆëŠ” ì‘í’ˆ
+    private GameObject openPanel;      // ì§€ê¸ˆ ì—´ë ¤ ìˆëŠ” íŒ¨ë„
 
 
     private void OnTriggerEnter(Collider other)
@@ -24,19 +24,32 @@ public class PlayerInteractor : MonoBehaviour
         nearby.ShowPrompt(false);
         nearby = null;
     }
+
     public void OnInteract(InputValue value)
     {
         if (!value.isPressed) return;
-        if (openPanel != null)             // ¿­·Á ÀÖÀ¸¸é ´İ±â
+
+        // ì´ë¯¸ ì—´ë ¤ ìˆìœ¼ë©´ ë‹«ê¸°
+        if (openPanel != null)
         {
             openPanel.SetActive(false);
             openPanel = null;
-            mover.canMove = true;
+            if (mover != null) mover.canMove = true;
             return;
         }
-        if (nearby == null) return;        // °¡±î¿î ÀÛÇ°ÀÌ ¾øÀ¸¸é ¹«½Ã
+
+        if (nearby == null) return;        // ê°€ê¹Œìš´ ì‘í’ˆì´ ì—†ìœ¼ë©´ ë¬´ì‹œ
+
+        // ğŸ›¡ï¸ [ì•ˆì „ì¥ì¹˜ ì¶”ê°€] íŒ¨ë„ì´ ì—°ê²°ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸
+        if (nearby.panel == null)
+        {
+            Debug.LogWarning($"[{nearby.gameObject.name}] ì „ì‹œë¬¼ì— ì—°ê²°ëœ íŒ¨ë„(Panel)ì´ ì—†ìŠµë‹ˆë‹¤! ì¸ìŠ¤í™í„°ì°½ì„ í™•ì¸í•´ì£¼ì„¸ìš”.", nearby.gameObject);
+            return;
+        }
+
         openPanel = nearby.panel;
         openPanel.SetActive(true);
-        mover.canMove = false;
+
+        if (mover != null) mover.canMove = false;
     }
 }
