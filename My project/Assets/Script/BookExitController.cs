@@ -6,6 +6,9 @@ public class BookExitController : MonoBehaviour
     public Animator bookAnimator;
     public Material fullscreenMaterial;
 
+    [Header("Effects")]
+    public ParticleSystem exitParticleSystem; // 👈 퇴장 클릭 시 재생할 파티클 시스템 연결
+
     public MonoBehaviour cameraController;
 
     public int effectStartFrame = 35;
@@ -45,7 +48,6 @@ public class BookExitController : MonoBehaviour
 
         foreach (RaycastHit hit in hits)
         {
-            // 👈 입장용 코드와 구분하기 위해 퇴장용 오브젝트 이름이나 자식 구조로 판정
             bool clickedBook =
                 hit.collider.name == targetBookColliderName ||
                 (bookAnimator != null && hit.collider.transform.IsChildOf(bookAnimator.transform));
@@ -54,6 +56,12 @@ public class BookExitController : MonoBehaviour
                 continue;
 
             Debug.Log("퇴장용 책 클릭됨: 종료 연출 시작");
+
+            // 👈 책이 클릭되는 순간 파티클 재생
+            if (exitParticleSystem != null)
+            {
+                exitParticleSystem.Play();
+            }
 
             if (bookAnimator != null)
             {
@@ -94,7 +102,7 @@ public class BookExitController : MonoBehaviour
         timer += Time.deltaTime;
 
         float t = Mathf.Clamp01(timer / effectDuration);
-        float strength = t * t * t;
+        float strength = t * t * t; // 3제곱 이징 완만함 적용
 
         // 화면 소용돌이 왜곡 적용
         fullscreenMaterial.SetFloat("_Zoom", Mathf.Lerp(1f, 0.18f, strength));
@@ -109,7 +117,6 @@ public class BookExitController : MonoBehaviour
             fullscreenMaterial.SetFloat("_TwirlStrength", 0f);
 
             Debug.Log("퇴장 연출 완료: 게임 종료 실행");
-
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false; // 에디터 정지
 #else
