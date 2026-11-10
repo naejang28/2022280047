@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 51891b1a0c5a0f04c9d7ae837f2b57e1
+guid: b966db0f18929eb4490abba55eff8de0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5129356837566204754
-    second: Capston copy_0
+      213: 8174603524319169183
+    second: side1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Capston copy_0
+      name: side1_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 6622
-        height: 9362
+        width: 1920
+        height: 1080
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 25bca550ed22f2740800000000000000
-      internalID: 5129356837566204754
+      spriteID: f9a43be2896027170800000000000000
+      internalID: 8174603524319169183
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Capston copy_0: 5129356837566204754
+      side1_0: 8174603524319169183
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
