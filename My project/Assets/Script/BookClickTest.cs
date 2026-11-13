@@ -1,16 +1,17 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class BookClickTest : MonoBehaviour
 {
     public Animator bookAnimator;
     public Material fullscreenMaterial;
     public ParticleSystem bookMagicParticle; // 👈 마법 파티클 연결용
-    public MonoBehaviour cameraController;
+    public MonoBehaviour cameraController;
     public MonoBehaviour playerController;
 
-    // 💡 [추가] 통째로 꺼버릴 책 오브젝트 (또는 책 컴포넌트가 붙어 있는 GameObject)
-    public GameObject bookObject;
+    // 💡 [추가] 통째로 꺼버릴 책 오브젝트 (또는 책 컴포넌트가 붙어 있는 GameObject)
+    public GameObject bookObject;
 
     private BookOutlineController outlineController;
 
@@ -46,24 +47,24 @@ public class BookClickTest : MonoBehaviour
             if (playerTransform != null && destinationPoint != null)
             {
                 playerTransform.SetPositionAndRotation(
-                    destinationPoint.position,
-                    destinationPoint.rotation
+                  destinationPoint.position,
+                  destinationPoint.rotation
                 );
             }
 
             SetControllersEnabled(true);
             SetCursorState(false);
 
-            // 💡 스킵으로 시작할 때 책 통째로 끄기
-            HideBook();
+            // 💡 스킵으로 시작할 때 책 통째로 끄기
+            HideBook();
         }
         else
         {
             if (playerTransform != null && bookStartPoint != null)
             {
                 playerTransform.SetPositionAndRotation(
-                    bookStartPoint.position,
-                    bookStartPoint.rotation
+                  bookStartPoint.position,
+                  bookStartPoint.rotation
                 );
             }
 
@@ -92,22 +93,22 @@ public class BookClickTest : MonoBehaviour
             cameraMoveTimer += Time.deltaTime;
 
             float t = cameraMoveDuration <= 0f
-                ? 1f
-                : Mathf.Clamp01(cameraMoveTimer / cameraMoveDuration);
+              ? 1f
+              : Mathf.Clamp01(cameraMoveTimer / cameraMoveDuration);
 
             float smoothT = t * t * (3f - 2f * t);
 
             playerTransform.SetPositionAndRotation(
-                Vector3.Lerp(
-                    moveStartPosition,
-                    destinationPoint.position,
-                    smoothT
-                ),
-                Quaternion.Slerp(
-                    moveStartRotation,
-                    destinationPoint.rotation,
-                    smoothT
-                )
+              Vector3.Lerp(
+                moveStartPosition,
+                destinationPoint.position,
+                smoothT
+              ),
+              Quaternion.Slerp(
+                moveStartRotation,
+                destinationPoint.rotation,
+                smoothT
+              )
             );
 
             if (t >= 1f)
@@ -129,7 +130,7 @@ public class BookClickTest : MonoBehaviour
             return;
 
         Ray ray = Camera.main.ScreenPointToRay(
-            Mouse.current.position.ReadValue()
+          Mouse.current.position.ReadValue()
         );
 
         RaycastHit[] hits = Physics.RaycastAll(ray, 1000f);
@@ -137,13 +138,13 @@ public class BookClickTest : MonoBehaviour
         foreach (RaycastHit hit in hits)
         {
             bool clickedBook =
-                hit.collider.name == "book_animation" ||
-                hit.collider.transform.IsChildOf(
-                    bookAnimator != null
-                        ? bookAnimator.transform
-                        : transform
-                ) ||
-                hit.collider.transform.parent?.name == "book_animation";
+              hit.collider.name == "book_animation" ||
+              hit.collider.transform.IsChildOf(
+                bookAnimator != null
+                  ? bookAnimator.transform
+                  : transform
+              ) ||
+              hit.collider.transform.parent?.name == "book_animation";
 
             if (!clickedBook)
                 continue;
@@ -161,8 +162,8 @@ public class BookClickTest : MonoBehaviour
                 SetControllersEnabled(false);
                 SetCursorState(false);
 
-                // 💡 책을 '클릭했을 때'만 파티클이 재생되도록 이 위치에 있어야 합니다!
-                if (bookMagicParticle != null)
+                // 💡 책을 '클릭했을 때'만 파티클이 재생되도록 이 위치에 있어야 합니다!
+                if (bookMagicParticle != null)
                 {
                     bookMagicParticle.Play();
                 }
@@ -193,13 +194,13 @@ public class BookClickTest : MonoBehaviour
         float strength = t * t * t;
 
         fullscreenMaterial.SetFloat(
-            "_Zoom",
-            Mathf.Lerp(1f, 0.18f, strength)
+          "_Zoom",
+          Mathf.Lerp(1f, 0.18f, strength)
         );
 
         fullscreenMaterial.SetFloat(
-            "_TwirlStrength",
-            Mathf.Lerp(0f, 12f, strength)
+          "_TwirlStrength",
+          Mathf.Lerp(0f, 12f, strength)
         );
 
         if (t >= 1f)
@@ -230,8 +231,8 @@ public class BookClickTest : MonoBehaviour
         SetControllersEnabled(true);
         SetCursorState(false);
 
-        // 💡 연출이 끝나고 도착 지점에 도달했을 때 책 통째로 끄기
-        HideBook();
+        // 💡 연출이 끝나고 도착 지점에 도달했을 때 책 통째로 끄기
+        HideBook();
     }
 
     void SetControllersEnabled(bool isEnabled)
@@ -261,8 +262,8 @@ public class BookClickTest : MonoBehaviour
         }
     }
 
-    // 💡 책 오브젝트와 아웃라인을 안전하게 꺼버리는 함수
-    void HideBook()
+    // 💡 책 오브젝트와 아웃라인을 안전하게 꺼버리는 함수
+    void HideBook()
     {
         if (outlineController != null)
         {
@@ -272,11 +273,11 @@ public class BookClickTest : MonoBehaviour
         if (bookObject != null)
         {
             bookObject.SetActive(false); // 책 오브젝트 비활성화
-        }
+        }
         else
         {
-            // 만약 변수에 따로 안 넣었다면 이 스크립트가 붙은 오브젝트 자체를 끄기
-            gameObject.SetActive(false);
+            // 만약 변수에 따로 안 넣었다면 이 스크립트가 붙은 오브젝트 자체를 끄기
+            gameObject.SetActive(false);
         }
     }
 }

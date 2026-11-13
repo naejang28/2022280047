@@ -38,8 +38,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _Strength: 10
-    - _TwirlStrength: 0.75609624
-    - _Zoom: 0.94833344
+    - _TwirlStrength: 0
+    - _Zoom: 1
     m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
