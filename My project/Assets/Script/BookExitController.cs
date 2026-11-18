@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class BookExitController : MonoBehaviour
 {
@@ -14,12 +15,9 @@ public class BookExitController : MonoBehaviour
     public int effectStartFrame = 35;
     public float effectDuration = 3f;
 
-    [Header("상호작용 설정")]
-    public string targetBookColliderName = "book_exit";
-    public float interactionDistance = 5f; // 💡 E 키로 상호작용 가능한 최대 거리 (필요시 조절 가능)
-
-    private bool playingEffect;
-    private float timer;
+    private bool playingEffect = false;
+    private float timer = 0f;
+    private bool isInsideZone = false; // 💡 플레이어가 존(Zone) 콜라이더 안에 있는지 여부
 
     void Start()
     {
@@ -33,57 +31,47 @@ public class BookExitController : MonoBehaviour
         playingEffect = false;
     }
 
+    // 💡 플레이어가 존(Trigger Collider) 영역 안으로 들어왔을 때
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player") || other.name.Contains("Player"))
+        {
+            isInsideZone = true;
+            Debug.Log("책 존(Zone) 진입: E키 또는 마우스 클릭으로 상호작용 가능");
+        }
+    }
+
+    // 💡 플레이어가 존(Trigger Collider) 영역을 벗어났을 때
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player") || other.name.Contains("Player"))
+        {
+            isInsideZone = false;
+            Debug.Log("책 존(Zone) 이탈: 상호작용 불가");
+        }
+    }
+
     void Update()
     {
         if (playingEffect)
             return;
 
-        if (Camera.main == null)
+        // 💡 존 안에 없을 때는 입력을 받지 않음
+        if (!isInsideZone)
             return;
 
-        // 1. 키보드 'E' 키를 눌렀을 때 -> 화면 중앙(플레이어가 바라보는 방향)에 책이 있는지 검사
+        // 1. 키보드 'E' 키 입력 확인
         bool ePressed = Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
-        if (ePressed)
-        {
-            // 화면 중앙(스크린 0.5, 0.5)에서 레이 발사
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            RaycastHit[] hits = Physics.RaycastAll(ray, interactionDistance);
 
-            foreach (RaycastHit hit in hits)
-            {
-                if (IsBookHit(hit))
-                {
-                    Debug.Log("책을 바라보고 E 키 입력됨: 종료 연출 시작");
-                    StartExitEffect();
-                    return;
-                }
-            }
-        }
-
-        // 2. 마우스 클릭 시 기존 레이캐스트 판정
+        // 2. 마우스 좌클릭 입력 확인
         bool mouseClicked = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
-        if (mouseClicked)
+
+        // 💡 존 안에 있는 상태에서 E키나 마우스 클릭 중 하나라도 누르면 바로 종료 연출 시작!
+        if (ePressed || mouseClicked)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f);
-
-            foreach (RaycastHit hit in hits)
-            {
-                if (IsBookHit(hit))
-                {
-                    Debug.Log("퇴장용 책 클릭됨: 종료 연출 시작");
-                    StartExitEffect();
-                    return;
-                }
-            }
+            Debug.Log("존 안에서 상호작용 입력 감지: 종료 연출 시작");
+            StartExitEffect();
         }
-    }
-
-    // 책 오브젝트인지 판정하는 공통 함수
-    bool IsBookHit(RaycastHit hit)
-    {
-        return hit.collider.name == targetBookColliderName ||
-               (bookAnimator != null && hit.collider.transform.IsChildOf(bookAnimator.transform));
     }
 
     // 연출 시작 공통 로직 함수
@@ -91,6 +79,7 @@ public class BookExitController : MonoBehaviour
     {
         if (exitParticleSystem != null)
         {
+            exitParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             exitParticleSystem.Play();
         }
 
@@ -119,7 +108,7 @@ public class BookExitController : MonoBehaviour
 
         AnimatorStateInfo state = bookAnimator.GetCurrentAnimatorStateInfo(0);
 
-        if (!state.IsName("Take 001_copy"))
+        if (!state.IsName("BookOpen"))
             return;
 
         float startTime = effectStartFrame / 30f;
