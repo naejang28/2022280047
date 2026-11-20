@@ -7,6 +7,6 @@ public class SceneLoader : MonoBehaviour
 
     public void Load()
     {
-        SceneManager.LoadScene(sceneName);
+        SceneFader.Go(sceneName);
     }
 }

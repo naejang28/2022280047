@@ -14,7 +14,7 @@ public class DoorOpenSceneController : MonoBehaviour
     public MonoBehaviour playerController; // 플레이어 이동 제어 스크립트
 
     [Header("씬 이동 설정")]
-    public string targetSceneName = "NextSceneName"; // 이동할 씬 이름 (Build Settings에 등록되어 있어야 함)
+    public string SceneName = "NextSceneName"; // 이동할 씬 이름 (Build Settings에 등록되어 있어야 함)
 
     [Header("연출 타이밍")]
     public int effectStartFrame = 35; // 애니메이션 중 쉐이더 효과가 시작될 프레임
@@ -145,14 +145,8 @@ public class DoorOpenSceneController : MonoBehaviour
         // 연출 시간이 모두 끝나면 씬 이동
         if (t >= 1f)
         {
-            playingEffect = false;
-
-            // 쉐이더 값 리셋 (씬 전환 직전 깜빡임 방지)
-            fullscreenMaterial.SetFloat("_Zoom", 1f);
-            fullscreenMaterial.SetFloat("_TwirlStrength", 0f);
-
-            Debug.Log("연출 완료: 씬 이동 실행 -> " + targetSceneName);
-            SceneManager.LoadScene(targetSceneName);
+            Debug.Log("연출 완료: 씬 이동 실행 -> " + SceneName);
+            SceneFader.Go(SceneName);
         }
     }
 
