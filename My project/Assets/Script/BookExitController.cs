@@ -7,6 +7,9 @@ public class BookExitController : MonoBehaviour
     public Animator bookAnimator;
     public Material fullscreenMaterial;
 
+    [Header("씬 이동 설정")]
+    public string SceneName;   // 넘어갈 씬 이름
+
     [Header("Effects")]
     public ParticleSystem exitParticleSystem; // 퇴장 시 재생할 파티클 시스템
 
@@ -18,6 +21,8 @@ public class BookExitController : MonoBehaviour
     private bool playingEffect = false;
     private float timer = 0f;
     private bool isInsideZone = false; // 💡 플레이어가 존(Zone) 콜라이더 안에 있는지 여부
+
+
 
     void Start()
     {
@@ -134,17 +139,8 @@ public class BookExitController : MonoBehaviour
         // 연출 시간이 끝났을 때 -> 게임 종료
         if (t >= 1f)
         {
-            playingEffect = false;
-
-            fullscreenMaterial.SetFloat("_Zoom", 1f);
-            fullscreenMaterial.SetFloat("_TwirlStrength", 0f);
-
-            Debug.Log("퇴장 연출 완료: 게임 종료 실행");
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false; // 에디터 정지
-#else            
-            Application.Quit(); // 빌드된 게임 종료
-#endif
+            Debug.Log("연출 완료: 씬 이동 실행 -> " + SceneName);
+            SceneFader.Go(SceneName);
         }
     }
 }
