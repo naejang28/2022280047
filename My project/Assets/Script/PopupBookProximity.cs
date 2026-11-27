@@ -2,30 +2,63 @@ using UnityEngine;
 
 public class PopupBookProximity : MonoBehaviour
 {
+    [Header("대상")]
     public Animator bookAnimator;
     public Animator popupAnimator;
     public Transform player;
-    public float openDistance = 20f;
     public Transform distancePoint;
-    private bool isOpen;
+    public float openDistance = 20f;
+
+    [Header("Animator 스테이트 이름")]
+    public string bookStateName = "Book_Open";
+    public string popupStateName = "Book_Open";
+
+    [Header("클립 길이(초). 0이면 자동으로 읽음")]
+    public float bookClipLength = 0f;
+    public float popupClipLength = 0f;
 
     [Header("책(Book) 애니메이션 속도 조절")]
-    [Tooltip("책이 열릴 때의 재생 속도")]
     public float bookOpenSpeed = 1f;
-    [Tooltip("책이 닫힐 때의 재생 속도")]
     public float bookCloseSpeed = 1f;
 
     [Header("팝업(Popup) 애니메이션 속도 조절")]
-    [Tooltip("팝업이 열릴 때의 재생 속도")]
     public float popupOpenSpeed = 1f;
-    [Tooltip("팝업이 닫힐 때의 재생 속도")]
     public float popupCloseSpeed = 1f;
+
+    [Header("열림 사운드")]
+    public AudioClip openSound;
+    [Range(0f, 1f)] public float openSoundVolume = 1f;
+    [Tooltip("0 = 2D(어디서나 같은 크기), 1 = 3D(책에서 멀어지면 작아짐)")]
+    [Range(0f, 1f)] public float openSoundSpatialBlend = 0f;
+    [Tooltip("열리는 도중에 나갔다 들어와도 다시 재생할지")]
+    public bool replayOnReopen = true;
+
+    // 0 = 닫힘, 1 = 열림
+    private float bookProgress;
+    private float popupProgress;
+    private bool isOpen;
+    private bool wasOpen;
+    private AudioSource sfxSource;
 
     void Start()
     {
-        // 게임 시작할 때 기본적으로 닫힌 상태로 시작하도록 세팅
-        if (bookAnimator != null) bookAnimator.SetBool("IsOpen", false);
-        if (popupAnimator != null) popupAnimator.SetBool("IsOpen", false);
+        Setup(bookAnimator);
+        Setup(popupAnimator);
+        Apply(bookAnimator, bookStateName, 0f);
+        Apply(popupAnimator, popupStateName, 0f);
+
+        // 효과음 전용 AudioSource 자동 생성
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+        sfxSource.loop = false;
+        sfxSource.spatialBlend = openSoundSpatialBlend;
+    }
+
+    void Setup(Animator anim)
+    {
+        if (anim == null) return;
+        anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+        anim.speed = 0f; // 재생은 스크립트가 직접 제어 (음수 사용 안 함)
     }
 
     void Update()
@@ -36,33 +69,65 @@ public class PopupBookProximity : MonoBehaviour
             ? distancePoint.position
             : transform.position;
 
-        float distance = Vector3.Distance(
-            player.position,
-            targetPosition
-        );
+        isOpen = Vector3.Distance(player.position, targetPosition) <= openDistance;
 
-        bool shouldOpen = distance <= openDistance;
+        // 닫힘 -> 열림으로 바뀐 순간에만 사운드 재생 (닫힐 때는 재생 안 함)
+        if (isOpen && !wasOpen) PlayOpenSound();
+        wasOpen = isOpen;
 
-        if (shouldOpen == isOpen) return;
+        bookProgress = Step(bookAnimator, bookStateName, bookProgress,
+            ResolveLength(bookAnimator, bookClipLength),
+            isOpen ? bookOpenSpeed : bookCloseSpeed);
 
-        isOpen = shouldOpen;
-
-        // 열릴 때와 닫힐 때의 속도를 각각 분기하여 적용
-        float currentBookSpeed = isOpen ? bookOpenSpeed : bookCloseSpeed;
-        float currentPopupSpeed = isOpen ? popupOpenSpeed : popupCloseSpeed;
-
-        PlayBookAnimation(bookAnimator, isOpen, currentBookSpeed);
-        PlayBookAnimation(popupAnimator, isOpen, currentPopupSpeed);
+        popupProgress = Step(popupAnimator, popupStateName, popupProgress,
+            ResolveLength(popupAnimator, popupClipLength),
+            isOpen ? popupOpenSpeed : popupCloseSpeed);
     }
 
-    void PlayBookAnimation(Animator anim, bool open, float speed)
+    void PlayOpenSound()
+    {
+        if (openSound == null || sfxSource == null) return;
+
+        // 이미 재생 중이면 겹쳐서 또 나지 않게 설정에 따라 처리
+        if (sfxSource.isPlaying && !replayOnReopen) return;
+
+        sfxSource.Stop();
+        sfxSource.PlayOneShot(openSound, openSoundVolume);
+    }
+
+    float Step(Animator anim, string stateName, float progress, float length, float speed)
+    {
+        if (anim == null) return progress;
+
+        float target = isOpen ? 1f : 0f;
+        if (Mathf.Approximately(progress, target)) return progress;
+
+        speed = Mathf.Max(speed, 0.01f);
+        float delta = (Time.deltaTime * speed) / length;
+        progress = Mathf.MoveTowards(progress, target, delta);
+
+        Apply(anim, stateName, progress);
+        return progress;
+    }
+
+    void Apply(Animator anim, string stateName, float progress)
     {
         if (anim == null) return;
+        anim.speed = 0f;
+        anim.Play(stateName, 0, Mathf.Clamp01(progress));
+        anim.Update(0f); // 지정한 위치의 포즈를 즉시 반영
+    }
 
-        // 속도가 0이거나 음수여서 멈추는 현상 방지 (최소 속도 보장)
-        if (speed <= 0.01f) speed = 0.01f;
+    float ResolveLength(Animator anim, float manual)
+    {
+        if (manual > 0.01f) return manual;
 
-        anim.speed = speed;
-        anim.SetBool("IsOpen", open);
+        if (anim != null && anim.runtimeAnimatorController != null)
+        {
+            var clips = anim.runtimeAnimatorController.animationClips;
+            if (clips.Length > 0 && clips[0].length > 0.01f)
+                return clips[0].length;
+        }
+        return 2f; // 읽기 실패 시 기본값
     }
 }

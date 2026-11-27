@@ -58,6 +58,7 @@ public class BookExitController : MonoBehaviour
 
     void Update()
     {
+        if (GameMenu.IsOpen) return;
         if (playingEffect)
             return;
 

@@ -21,7 +21,7 @@ public class SceneFader : MonoBehaviour
     private void Update()
     {
         float target = (nextScene == null) ? 0f : 1f;
-        alpha = Mathf.MoveTowards(alpha, target, Time.deltaTime / duration);
+        alpha = Mathf.MoveTowards(alpha, target, Time.unscaledDeltaTime / duration);
         black.color = new Color(0f, 0f, 0f, curve.Evaluate(alpha));
         if (nextScene != null && alpha >= 1f) SceneManager.LoadScene(nextScene);
     }

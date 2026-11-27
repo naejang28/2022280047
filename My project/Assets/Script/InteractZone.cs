@@ -11,8 +11,10 @@ public class InteractZone : MonoBehaviour
     [Header("Sound Delay Settings")]
     public GameObject soundObject;        // 💡 딜레이 후 켤 사운드 오브젝트
     public float soundDelay = 1.5f;       // 💡 사운드가 켜질 때까지의 딜레이 시간 (초)
+    public bool playOnlyOnce = true;      // 💡 true면 한 번만 재생, false면 매번 재생
 
     private bool playerNear;
+    private bool soundPlayed = false;     // 💡 이미 재생했는지 체크
     private FirstPersonMover mover;
 
     private void Start()
@@ -51,6 +53,7 @@ public class InteractZone : MonoBehaviour
 
     private void Update()
     {
+        if (GameMenu.IsOpen) return;
         if (!playerNear || Keyboard.current == null || !Keyboard.current.eKey.wasPressedThisFrame) return;
 
         bool willBeActive = panel != null ? !panel.activeSelf : true;
@@ -61,16 +64,20 @@ public class InteractZone : MonoBehaviour
         if (lockMove && mover != null)
             mover.enabled = !willBeActive;
 
-        // 💡 E키를 누르는 순간 사운드 오브젝트 딜레이 코루틴 실행
-        if (soundObject != null)
+        // 💡 패널이 열릴 때만 + 아직 안 울렸을 때만(playOnlyOnce 기준) 사운드 딜레이 실행
+        if (willBeActive && soundObject != null)
         {
-            // 기존에 돌고 있던 코루틴이 있다면 겹치지 않게 중지하고 새로 시작
-            StopAllCoroutines();
-            StartCoroutine(ActivateSoundObjectWithDelay());
+            if (!playOnlyOnce || !soundPlayed)
+            {
+                soundPlayed = true;
+                StopAllCoroutines();
+                StartCoroutine(ActivateSoundObjectWithDelay());
+            }
         }
-        else
+        else if (!willBeActive && soundObject != null)
         {
-            Debug.LogWarning("SoundObject가 인스펙터에 연결되어 있지 않습니다!");
+            // 패널 닫을 때 혹시 대기 중인 코루틴이 있다면 취소
+            StopAllCoroutines();
         }
     }
 
@@ -82,7 +89,7 @@ public class InteractZone : MonoBehaviour
         if (soundObject != null)
         {
             soundObject.SetActive(true);
-            Debug.Log("사운드 오브젝트 켜짐!");
+            Debug.Log("사운드 오브젝트 켜짐 (1회 재생)!");
         }
     }
 }
