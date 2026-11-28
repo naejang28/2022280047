@@ -1,9 +1,21 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonMover : MonoBehaviour
 {
+    [Header("발소리")]
+    public AudioClip[] footstepSounds;                 // 여러 개 넣으면 랜덤 재생
+    [Range(0f, 1f)] public float walkStepVolume = 0.5f;
+    [Range(0f, 1f)] public float runStepVolume = 0.8f;
+    [Range(0f, 1f)] public float crouchStepVolume = 0.2f;
+    public Vector2 pitchRange = new Vector2(0.95f, 1.05f);   // 음높이를 살짝 랜덤으로 (반복감 감소)
+    public AudioMixerGroup sfxGroup;
+    private AudioSource stepSource;
+    private int lastStepIndex;
+    private int lastClipIndex = -1;
+
     [Header("이동")]
     public float walkSpeed = 4f;
     public float runSpeed = 7f;
@@ -88,6 +100,12 @@ public class FirstPersonMover : MonoBehaviour
 
     private void Awake()
     {
+        stepSource = gameObject.AddComponent<AudioSource>();
+        stepSource.playOnAwake = false;
+        stepSource.loop = false;
+        stepSource.spatialBlend = 0f;   // 2D (플레이어 본인 소리)
+        stepSource.outputAudioMixerGroup = sfxGroup;
+
         cc = GetComponent<CharacterController>();
         cc.height = standHeight;
         cc.center = new Vector3(0f, standHeight * 0.5f, 0f);
@@ -200,7 +218,20 @@ public class FirstPersonMover : MonoBehaviour
         wasGrounded = cc.isGrounded;
         landDip = Mathf.Lerp(landDip, 0f, Time.deltaTime * landDipRecovery);
     }
+    void PlayFootstep()
+    {
+        if (footstepSounds == null || footstepSounds.Length == 0) return;
 
+        // 같은 소리가 연속으로 나오지 않게 선택
+        int idx = Random.Range(0, footstepSounds.Length);
+        if (footstepSounds.Length > 1 && idx == lastClipIndex)
+            idx = (idx + 1) % footstepSounds.Length;
+        lastClipIndex = idx;
+
+        float vol = crouchHeld ? crouchStepVolume : (isRunning ? runStepVolume : walkStepVolume);
+        stepSource.pitch = Random.Range(pitchRange.x, pitchRange.y);
+        stepSource.PlayOneShot(footstepSounds[idx], vol);
+    }
     void HandleBob()
     {
         float planarSpeed = new Vector2(horizontalVelocity.x, horizontalVelocity.z).magnitude;
@@ -218,7 +249,13 @@ public class FirstPersonMover : MonoBehaviour
 
             // 실제 이동 거리에 비례해 걸음 진행 → 빠르면 걸음도 빨라짐
             bobTimer += planarSpeed * freq * Time.deltaTime;
-
+            // 발이 닿는 순간(bobTimer가 π를 넘을 때마다) 발소리
+            int stepIndex = Mathf.FloorToInt(bobTimer / Mathf.PI);
+            if (stepIndex != lastStepIndex)
+            {
+                lastStepIndex = stepIndex;
+                PlayFootstep();
+            }
             // 한 걸음(왼/오)마다 한 번씩 출렁임. abs로 발이 닿을 때 가장 낮게
             float step = Mathf.Sin(bobTimer * 2f);
             targetY = -Mathf.Abs(Mathf.Sin(bobTimer)) * ampY * 2f + ampY;

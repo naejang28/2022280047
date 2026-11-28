@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class PopupBookProximity : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class PopupBookProximity : MonoBehaviour
     [Range(0f, 1f)] public float openSoundSpatialBlend = 0f;
     [Tooltip("열리는 도중에 나갔다 들어와도 다시 재생할지")]
     public bool replayOnReopen = true;
-
+    public AudioMixerGroup sfxGroup;
     // 0 = 닫힘, 1 = 열림
     private float bookProgress;
     private float popupProgress;
@@ -52,6 +53,7 @@ public class PopupBookProximity : MonoBehaviour
         sfxSource.playOnAwake = false;
         sfxSource.loop = false;
         sfxSource.spatialBlend = openSoundSpatialBlend;
+        sfxSource.outputAudioMixerGroup = sfxGroup;
     }
 
     void Setup(Animator anim)
